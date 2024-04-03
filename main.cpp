@@ -8,7 +8,7 @@
 
 #include "vector.h"
 #include "matrix.h"
-#include "metodsparetonesh.h"
+//#include "metodsparetonesh.h"
 
 namespace gameTheoryAndOperationsResearch {
     void _gameTheoryAndOperationsResearch_readfile() {
@@ -23,7 +23,6 @@ namespace gameTheoryAndOperationsResearch {
     gameTheoryAndOperationsResearch_matrix _gameTheoryAndOperationsResearch_matrix_main;
     gameTheoryAndOperationsResearch_vector _gameTheoryAndOperationsResearch_vector_main;
 
-    // 9 Вариант
     double M1[DEFINE_N1][DEFINE_N1] = { { 4, 5 },
                                         { 0, 7 } }; // Матрица для 1-го игрока
     double M2[DEFINE_N1][DEFINE_N1] = { { 7, 2 },
@@ -42,6 +41,8 @@ namespace gameTheoryAndOperationsResearch {
                     if ((*(M1 + i * n + j) >= Val1 && *(M2 + i * n + j) > Val2) ||
                         (*(M1 + i * n + j) > Val1 && *(M2 + i * n + j) >= Val2))
                         return false;  // Нашли решение, которое доминирует, решение не принадлежит множеству Парето
+        if(Val1 == Val2)
+            return false;
 
         return true; // Не нашли доминирующего решения, значит решение принадлежит множеству Парето
     }
@@ -63,6 +64,10 @@ namespace gameTheoryAndOperationsResearch {
             if (j != j1)
                 if (*(M2 + i1 * n + j) > Val2)
                     return false; // Второй игрок может улучшить свое решение при заданном решении 1-го игрока, решение не принадлехит Нешу
+
+        if(Val1 == Val2)
+            return false;
+
         return true; // Решение принадлежит Нешу
     }
 
@@ -141,7 +146,7 @@ namespace gameTheoryAndOperationsResearch {
                 }
 
         fout << "\n[The Nash solution]" << std::endl;
-         bool flag = false;
+        bool flag = false;
         for (int i = 0; i < DEFINE_N2; i++)
             for (int j = 0; j < DEFINE_N2; j++)
                 if (is_lot_of_Nesh((int *)M22_1, (int *)M22_2, DEFINE_N2, i, j)) // Нашли решение из множества Неша
@@ -154,7 +159,7 @@ namespace gameTheoryAndOperationsResearch {
                     flag = true;
                 }
         if (!flag) {
-                fout << "\n[!] There is no Nash solution in pure strategies" << std::endl;
+                fout << "[!] There is no Nash solution in pure strategies" << std::endl;
         }
 
         print_matrix(fout, (char *)"The 1st 2x2 matrix for the Prisoner's «Dilemma game»", (int *)M1_1, DEFINE_N1);
