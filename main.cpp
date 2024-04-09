@@ -28,24 +28,47 @@ namespace gameTheoryAndOperationsResearch {
     double M2[DEFINE_N1][DEFINE_N1] = { { 7, 2 },
                                         { 2, 3} }; // Матрица для 2-го игрока
 
-    // Проверка принадлежит ли решение с индексами i1 и j1 множеству Парето
     // Исходные матрицы передаются через указатели
+
+    /**
+     * В коде исправлены ошибки:
+     *
+     * В for добавлены проверки на равенство индексов i и j
+     * индексам i1 и j1. Это сделано чтобы избежать
+     * бесконечных циклов при проверке на доминирование решения.
+     */
+
+    // Проверка принадлежит ли решение с индексами i1 и j1 множеству Парето
     template<typename T>
     bool is_lot_of_Pareto(T *M1, T *M2, int n, int i1, int j1)
     {
         T Val1 = *(M1 + i1 * n + j1);
         T Val2 = *(M2 + i1 * n + j1);
+
         for (int i = 0; i < n; i++)
+        {
             for (int j = 0; j < n; j++)
-                if (!((i == i1) && (j == j1))) // Просматриваем все элементы кроме заданного
-                    if ((*(M1 + i * n + j) >= Val1 && *(M2 + i * n + j) > Val2) ||
-                        (*(M1 + i * n + j) > Val1 && *(M2 + i * n + j) >= Val2))
-                        return false;  // Нашли решение, которое доминирует, решение не принадлежит множеству Парето
-        if(Val1 == Val2)
-            return false;
+            {
+                if ((i == i1) && (j == j1)) // Просматриваем заданный элемент
+                    continue;
+
+                if ((*(M1 + i * n + j) >= Val1 && *(M2 + i * n + j) > Val2) ||
+                    (*(M1 + i * n + j) > Val1 && *(M2 + i * n + j) >= Val2))
+                {
+                    return false;  // Нашли решение, которое доминирует, решение не принадлежит множеству Парето
+                }
+            }
+        }
 
         return true; // Не нашли доминирующего решения, значит решение принадлежит множеству Парето
     }
+
+    /**
+     * В коде исправлены ошибки:
+     *
+     * В for были добавлены проверки на равенство индексов i и j индексам i1 и j1.
+     * Это сделано чтобы избежать бесконечных циклов при проверке на улучшение решения
+     */
 
     // Проверка принадлежит ли решение с индексами i1 и j1 множеству Неша
     template<typename T>
@@ -53,19 +76,30 @@ namespace gameTheoryAndOperationsResearch {
     {
         T Val1 = *(M1 + i1 * n + j1);
         T Val2 = *(M2 + i1 * n + j1);
+
         // Проверяем может ли первый игрок улучшить свое решение
         for (int i = 0; i < n; i++)
-            if (i != i1)
-                if (*(M1 + i * n + j1) > Val1)
-                    return false; // Первый игрок может улучшить свое решение при заданном решении 2-го игрока, решение не принадлешит Нешу
+        {
+            if (i == i1)
+                continue;
+
+            if (*(M1 + i * n + j1) > Val1)
+                return false;   // Первый игрок может улучшить свое решение при заданном решении 2-го игрока,
+                                // решение не принадлежит Нешу
+        }
 
         // Проверяем может ли второй игрок улучшить свое решение
         for (int j = 0; j < n; j++)
-            if (j != j1)
-                if (*(M2 + i1 * n + j) > Val2)
-                    return false; // Второй игрок может улучшить свое решение при заданном решении 1-го игрока, решение не принадлехит Нешу
+        {
+            if (j == j1)
+                continue;
 
-        if(Val1 == Val2)
+            if (*(M2 + i1 * n + j) > Val2)
+                return false;   // Второй игрок может улучшить свое решение при заданном решении 1-го игрока,
+                                // решение не принадлежит Нешу
+        }
+
+        if (Val1 == Val2)
             return false;
 
         return true; // Решение принадлежит Нешу
@@ -92,7 +126,7 @@ namespace gameTheoryAndOperationsResearch {
         srand(time(0));
         int M22_1[DEFINE_N2][DEFINE_N2], M22_2[DEFINE_N2][DEFINE_N2];   // Матрицы 10 х 10 для заполнения псевдослуч числами
 
-        int N = 15;
+        int N = 150;
 
         int M1_1[DEFINE_N1][DEFINE_N1] = { { rand() % N, rand() % N },
                                            { rand() % N, rand() % N } }; // The 1st 2x2 matrix for the Prisoner's «Dilemma game»
@@ -113,24 +147,24 @@ namespace gameTheoryAndOperationsResearch {
 
         std::ofstream fout(gameTheoryAndOperationsResearch_filename);
 
-        fout << "****GENERATION START****" << std::endl;
-        fout << "[Dilemma game]" << std::endl;
-        print_matrix(fout,  (char *)"M1_1", (int *)M1_1, (int)DEFINE_N1);
-        print_matrix(fout,  (char *)"M2_1", (int *)M2_1, (int)DEFINE_N1);
-        fout << "[Family Dispute]" << std::endl;
-        print_matrix(fout,  (char *)"M1_2", (int *)M1_2, (int)DEFINE_N1);
-        print_matrix(fout,  (char *)"M2_2", (int *)M2_2, (int)DEFINE_N1);
-        fout << "[Crossroads]" << std::endl;
-        print_matrix(fout,  (char *)"M1_3", (int *)M1_3, (int)DEFINE_N1);
-        print_matrix(fout,  (char *)"M2_3", (int *)M2_3, (int)DEFINE_N1);
-        fout << "****GENERATION END****\n" << std::endl;
+//        fout << "****GENERATION START****" << std::endl;
+//        fout << "[Dilemma game]" << std::endl;
+//        print_matrix(fout,  (char *)"M1_1", (int *)M1_1, (int)DEFINE_N1);
+//        print_matrix(fout,  (char *)"M2_1", (int *)M2_1, (int)DEFINE_N1);
+//        fout << "[Family Dispute]" << std::endl;
+//        print_matrix(fout,  (char *)"M1_2", (int *)M1_2, (int)DEFINE_N1);
+//        print_matrix(fout,  (char *)"M2_2", (int *)M2_2, (int)DEFINE_N1);
+//        fout << "[Crossroads]" << std::endl;
+//        print_matrix(fout,  (char *)"M1_3", (int *)M1_3, (int)DEFINE_N1);
+//        print_matrix(fout,  (char *)"M2_3", (int *)M2_3, (int)DEFINE_N1);
+//        fout << "****GENERATION END****\n" << std::endl;
 
         // заполняем матрцы ПСЧ
         for(int i=0; i<DEFINE_N2; i++) {
             for (int j = 0; j < DEFINE_N2; j++)
             {
-                M22_1[i][j] = rand() % 20;
-                M22_2[i][j] = rand() % 20;
+                M22_1[i][j] = rand() % 100;
+                M22_2[i][j] = rand() % 100;
             }
         }
 
@@ -142,7 +176,11 @@ namespace gameTheoryAndOperationsResearch {
         for (int i = 0; i < DEFINE_N2; i++)
             for (int j = 0; j < DEFINE_N2; j++)
                 if (is_lot_of_Pareto((int *)M22_1, (int *)M22_2, DEFINE_N2, i, j)) {// Нашли решение из множества Парето
-                    fout << "\ti: " << (i + 1) << "\tj: " << (j + 1) << "\tM1: " << M22_1[i][j] << "\tM2: " << M22_2[i][j] << std::endl;
+                    fout << "\ti: " << (i + 1)
+                         << "\tj: " << (j + 1)
+                         << "\tM1: " << M22_1[i][j]
+                         << "\tM2: " << M22_2[i][j]
+                         << std::endl;
                 }
 
         fout << "\n[The Nash solution]" << std::endl;
